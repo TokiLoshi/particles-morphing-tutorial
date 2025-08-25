@@ -48,6 +48,7 @@ window.addEventListener("resize", () => {
 			sizes.height * sizes.pixelRatio
 		);
 	}
+
 	// Update camera
 	camera.aspect = sizes.width / sizes.height;
 	camera.updateProjectionMatrix();
@@ -100,6 +101,25 @@ gltfLoader.load("./models.glb", (gltf) => {
 	 * Particles
 	 */
 	particles = {};
+
+	// Positions
+	const positions = gltf.scene.children.map(
+		(child) => child.geometry.attributes.position
+	);
+	console.log(positions);
+
+	particles.maxCount = 0;
+	for (const position of positions) {
+		if (position.count > particles.maxCount) {
+			particles.maxCount = position.count;
+		}
+	}
+
+	particles.positions = [];
+	for (const position of positions) {
+		const originalArray = position.array;
+		const newArray = new Float32Array(particles.maxCount * 3);
+	}
 
 	// Geometry
 	particles.geometry = new THREE.SphereGeometry(3);
