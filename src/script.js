@@ -119,25 +119,44 @@ gltfLoader.load("./models.glb", (gltf) => {
 	for (const position of positions) {
 		const originalArray = position.array;
 		const newArray = new Float32Array(particles.maxCount * 3);
+
+		for (let i = 0; i < particles.maxCount; i++) {
+			const i3 = i * 3;
+
+			if (i3 < originalArray.length) {
+				newArray[i3 + 0] = originalArray[i3 + 0];
+				newArray[i3 + 1] = originalArray[i3 + 1];
+				newArray[i3 + 2] = originalArray[i3 + 2];
+			} else {
+				const randomIndex = Math.floor(position.count * Math.random()) * 3;
+				newArray[i3 + 0] = originalArray[randomIndex + 0];
+				newArray[i3 + 1] = originalArray[randomIndex + 1];
+				newArray[i3 + 2] = originalArray[randomIndex + 2];
+			}
+		}
+		particles.positions.push(new THREE.Float32BufferAttribute(newArray, 3));
 	}
 
 	// Geometry
-	particles.geometry = new THREE.SphereGeometry(3);
+	particles.geometry = new THREE.BufferGeometry();
+	particles.geometry.setAttribute("position", particles.positions[1]);
+	particles.geometry.setAttribute("aPositionTarget", particles.positions[3]);
 	// set index to null to reduce the number of vertices and make the sphere less bright
-	particles.geometry.setIndex(null);
+	// particles.geometry.setIndex(null);
 
 	// Material
 	particles.material = new THREE.ShaderMaterial({
 		vertexShader: particlesVertexShader,
 		fragmentShader: particlesFragmentShader,
 		uniforms: {
-			uSize: new THREE.Uniform(0.4),
+			uSize: new THREE.Uniform(0.2),
 			uResolution: new THREE.Uniform(
 				new THREE.Vector2(
 					sizes.width * sizes.pixelRatio,
 					sizes.height * sizes.pixelRatio
 				)
 			),
+			uProgress: new THREE.Uniform(0),
 		},
 		blending: THREE.AdditiveBlending,
 		depthWrite: false,
@@ -146,6 +165,14 @@ gltfLoader.load("./models.glb", (gltf) => {
 	// Points
 	particles.points = new THREE.Points(particles.geometry, particles.material);
 	scene.add(particles.points);
+
+	// Tweaks
+	gui
+		.add(particles.material.uniforms.uProgress, "value")
+		.min(0)
+		.max(1)
+		.step(0.001)
+		.name("uProgress");
 });
 
 /**
