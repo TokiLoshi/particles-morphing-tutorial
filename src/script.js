@@ -137,6 +137,11 @@ gltfLoader.load("./models.glb", (gltf) => {
 	}
 
 	// Geometry
+	const sizesArray = new Float32Array(particles.maxCount);
+	for (let i = 0; i < particles.maxCount; i++) {
+		sizesArray[i] = Math.random();
+	}
+
 	particles.geometry = new THREE.BufferGeometry();
 	particles.geometry.setAttribute(
 		"position",
@@ -146,6 +151,10 @@ gltfLoader.load("./models.glb", (gltf) => {
 		"aPositionTarget",
 		particles.positions[particles.index]
 	);
+	particles.geometry.setAttribute(
+		"aSize",
+		new THREE.BufferAttribute(sizesArray, 1)
+	);
 	// set index to null to reduce the number of vertices and make the sphere less bright
 	// particles.geometry.setIndex(null);
 
@@ -154,7 +163,7 @@ gltfLoader.load("./models.glb", (gltf) => {
 		vertexShader: particlesVertexShader,
 		fragmentShader: particlesFragmentShader,
 		uniforms: {
-			uSize: new THREE.Uniform(0.2),
+			uSize: new THREE.Uniform(0.4),
 			uResolution: new THREE.Uniform(
 				new THREE.Vector2(
 					sizes.width * sizes.pixelRatio,
@@ -207,7 +216,8 @@ gltfLoader.load("./models.glb", (gltf) => {
 		.min(0)
 		.max(1)
 		.step(0.001)
-		.name("uProgress");
+		.name("uProgress")
+		.listen();
 	gui.add(particles, "morph0");
 	gui.add(particles, "morph1");
 	gui.add(particles, "morph2");
